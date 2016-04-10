@@ -1,0 +1,50 @@
+\documentclass{article}
+\include{common}
+
+\newcommand{\wt}[2]{{#1}^{#2}}
+
+\begin{document}
+
+Syntax:
+
+$$
+\begin{array}{cc}
+   x& | \\
+   \lambda x.A& | \\
+   A\;B& | \\
+   \llang{C}\;A_1\dots A_m & | \\
+   \llang{match}\;A\;\llang{with}\;\llang{C}_1\;x^1_1\dots x^1_{k_1}\to B_1\llang{;}\ldots\llang{;}\llang{C}_m\;x^m_1\dots x^m_{k_m}\to B_m& |\\
+   \llang{let}\;x\;\llang{=}\;A\;\llang{in}\;B& | \\
+   \llang{let rec}\;x\;\llang{=}\;A\;\llang{in}\;B&
+\end{array}
+$$
+
+$$
+\Trans{\llang{x}}{}{\llang{x}}
+\ruleno{VarF}
+$$
+
+$$
+\withenv{q}{\trans{\llang{x}}{}{q \equiv \llang{x}}}
+\ruleno{VarA}
+$$
+
+$$
+\trule{\withenv{q}{\trans{A}{}{A^\prime}}}
+      {\Trans{\wt{(\lambda x.A)}{\_\to a}}{}{\lambda q x . A^\prime}}
+\ruleno{LamA}
+$$
+
+$$
+\trule{\Trans{A}{}{A^\prime}}
+      {\Trans{\wt{(\lambda x.A)}{\_\to f}}{}{\lambda q x.A^\prime q}}
+\ruleno{LamF}
+$$
+
+$$
+\trule{\withenv{q_1}{\trans{A_1}{}{A_1^\prime}},\dots,\withenv{q_k}{\trans{A_k}{}{A_k^\prime}}}
+      {\withenv{q}{\trans{\llang{C $\wt{A_1}{a}\dots \wt{A_k}{a}$}}{}{\llang{fresh($q_1\dots q_k$)$A_1^\prime\dots A_k^\prime$($q\equiv\;$ !(C ($q_1,\dots,q_k$)))}}}}
+\ruleno{Cnstr}
+$$
+
+\end{document}
