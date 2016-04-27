@@ -5,7 +5,7 @@
 
 \begin{document}
 
-Syntax:
+Syntax
 
 $$
 \begin{array}{cc}
@@ -14,37 +14,73 @@ $$
    A\;B& | \\
    \llang{C}\;A_1\dots A_m & | \\
    \llang{match}\;A\;\llang{with}\;\llang{C}_1\;x^1_1\dots x^1_{k_1}\to B_1\llang{;}\ldots\llang{;}\llang{C}_m\;x^m_1\dots x^m_{k_m}\to B_m& |\\
-   \llang{let}\;x\;\llang{=}\;A\;\llang{in}\;B& | \\
-   \llang{let rec}\;x\;\llang{=}\;A\;\llang{in}\;B&
+   \llang{let (rec)}\;x\;\llang{=}\;A\;\llang{in}\;B& \\
 \end{array}
 $$
 
+$\pi$-function
+
 $$
-\Trans{\llang{x}}{}{\llang{x}}
-\ruleno{VarF}
+\pi(a) = \overline{a} \to [a]
 $$
 
 $$
-\withenv{q}{\trans{\llang{x}}{}{q \equiv \llang{x}}}
-\ruleno{VarA}
+\pi(t_1 \to t_2) = \pi(t_1) \to \pi(t_2)
+$$
+
+Translation rules
+
+$$
+\trans{\llang{x}}{}{\llang{x}}
+\ruleno{Var}
 $$
 
 $$
-\trule{\withenv{q}{\trans{A}{}{A^\prime}}}
-      {\Trans{\wt{(\lambda x.A)}{\_\to a}}{}{\lambda q x . A^\prime}}
-\ruleno{LamA}
+\trule{\trans{A}{}{A^\prime}}
+      {\trans{\lambda x.A}{}{\lambda x . A^\prime}}
+\ruleno{Lam}
 $$
 
 $$
-\trule{\Trans{A}{}{A^\prime}}
-      {\Trans{\wt{(\lambda x.A)}{\_\to f}}{}{\lambda q x.A^\prime q}}
-\ruleno{LamF}
+\trule{\trans{A}{}{A^\prime}, \trans{B}{}{B^\prime}}
+      {\trans{A B}{}{A^\prime B^\prime}}
+\ruleno{App}
 $$
 
 $$
-\trule{\withenv{q_1}{\trans{A_1}{}{A_1^\prime}},\dots,\withenv{q_k}{\trans{A_k}{}{A_k^\prime}}}
-      {\withenv{q}{\trans{\llang{C $\wt{A_1}{a}\dots \wt{A_k}{a}$}}{}{\llang{fresh($q_1\dots q_k$)$A_1^\prime\dots A_k^\prime$($q\equiv\;$ !(C ($q_1,\dots,q_k$)))}}}}
+\trule{\trans{A_1}{}{A_1^\prime},\dots,\trans{A_k}{}{A_k^\prime}}
+      {\trans{\llang{C $A_1\dots A_k$}}
+             {}
+             {\lambda q . \llang{
+                  fresh($q_1 \dots q_k$)
+                     $(A_1^\prime q_1) \dots (A_k^\prime q_k)$
+                     ($q\equiv\;$ !(C $q_1 \dots q_k$)))
+             }}
+      }
 \ruleno{Cnstr}
+$$
+
+$$
+\trule{\trans{A}{}{A^\prime}, \dots, \trans{B_i}{}{B_i^\prime}, \dots }
+      {\trans{\llang{match A with $\| C_i p_1 \dots p_m \to B_i $}}
+             {}
+             {\lambda q_1 \dots \lambda q_k \lambda q_r . \llang{
+                  fresh($q_m$) 
+                     ($A^\prime q_m$)
+                     (conde [ 
+                     ; fresh($r_1 \dots r_m$) 
+                           ($ q_m \equiv !(C_i r_1 \dots r_m $))
+                           (in $\dots$ let $p_i$ = $\lambda q . q \equiv r_i$ in $\dots$ in $B_i^\prime q_1 \dots q_k q_r$)
+                     ])
+             }}
+      }
+\ruleno{Match}
+$$
+
+$$
+\trule{\trans{A}{}{A^\prime}, \trans{B}{}{B^\prime}}
+      {\trans{\llang{let (rec) x = A in B}}{}{\llang{let (rec) x = $A^\prime$ in $B^\prime$}}}
+\ruleno{Let}
 $$
 
 \end{document}
